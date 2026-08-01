@@ -14,7 +14,7 @@ log() { echo "[$(TS)] $1" | tee -a "$LOG_FILE"; }
 
 if [ "$(id -u)" != "0" ]; then
   echo "→ Butuh root, re-run via su..."
-  exec su -c "sh $0"
+  exec su -c "/data/data/com.termux/files/usr/bin/bash $0"
 fi
 
 METHOD="${1:-wifi}"   # default wifi, atau: airplane | all

@@ -21,7 +21,7 @@ IP_METHOD="${1:-wifi}"
 # ---------- Self-escalate ----------
 if [ "$(id -u)" != "0" ]; then
   echo "→ Butuh root, re-run via su..."
-  exec su -c "bash $0 $IP_METHOD"
+  exec su -c "/data/data/com.termux/files/usr/bin/bash $0 $IP_METHOD"
 fi
 
 TARGET_APPS=(

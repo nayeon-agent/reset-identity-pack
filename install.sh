@@ -6,7 +6,7 @@
 
 if [ "$(id -u)" != "0" ]; then
   echo "→ Butuh root untuk install, re-run via su..."
-  exec su -c "bash $0"
+  exec su -c "/data/data/com.termux/files/usr/bin/bash $0"
 fi
 
 echo "=============================================="
