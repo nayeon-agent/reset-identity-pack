@@ -25,13 +25,15 @@ fi
 # ============================================================
 TGT_MANUFACTURER="samsung"
 TGT_BRAND="samsung"
-TGT_MODEL="SM-S938B"
-TGT_DEVICE="pa3q"
-TGT_PRODUCT="pa3qxxx"
-TGT_HARDWARE="qcom"                       # S25 Ultra pake Snapdragon 8 Elite
-TGT_FINGERPRINT="samsung/pa3qxxx/pa3q:16/BP2A.250605.031.A3/S938BXXU1BYC9:user/release-keys"
+TGT_MODEL="SM-S901B"
+TGT_DEVICE="r0s"
+TGT_PRODUCT="r0sxxx"
+TGT_HARDWARE="samsungexynos8895"          # Note 8 = Exynos 8895 (sesuai kernel asli biar gak flag)
+TGT_FINGERPRINT="samsung/r0sxxx/r0s:16/BP2A.250605.031.A3/S901BXXSNGZD7:user/release-keys"
 TGT_SECURITY_PATCH="2026-05-05"
 TGT_SERIAL="R3CTW$(head -c 4 /dev/urandom | od -An -tx1 | tr -d ' \n')"
+# Attested boot hash dari TEE (wajib match biar DuckDetector pass)
+TGT_VBMETA_DIGEST="46ec95edb72801b74f475adca2ff6b2fee76a0def983479fc43e7166710232fd"
 
 # ============================================================
 #  EKSEKUSI
@@ -77,7 +79,13 @@ resetprop -n ro.debuggable 0 2>>"$LOG_FILE"
 resetprop -n ro.secure 1 2>>"$LOG_FILE"
 resetprop -n ro.build.type user 2>>"$LOG_FILE"
 resetprop -n ro.build.tags release-keys 2>>"$LOG_FILE"
-log "  ✓ boot state: locked + green + user build"
+# vbmeta digest match attested hash (fix "Attested verifiedBootHash was present,
+# but ro.boot.vbmeta.digest was empty" dari DuckDetector)
+resetprop -n ro.boot.vbmeta.digest "$TGT_VBMETA_DIGEST" 2>>"$LOG_FILE"
+# AVB additional flags biar Magic Mountain Fully chain gak flood
+resetprop -n ro.boot.vbmeta.device_state locked 2>>"$LOG_FILE"
+resetprop -n ro.boot.avb_version 1.1 2>>"$LOG_FILE"
+log "  ✓ boot state: locked + green + user build + vbmeta match"
 
 # --- 4. Hardware (⚠️ opsional — bisa ganggu app system tertentu) ---
 # Hati-hati: ro.hardware dipakai system buat load HAL.
