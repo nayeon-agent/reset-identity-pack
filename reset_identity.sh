@@ -28,6 +28,7 @@ TARGET_APPS=(
   "com.shopee.id"
   "com.tokopedia.tkpd"
   "com.ss.android.ugc.aweme"
+  "com.ss.android.ugc.trill"
 )
 
 echo ""
