@@ -24,6 +24,9 @@ cp "$SCRIPT_SRC/spoof_props.sh"        "$DEST_DIR/" 2>/dev/null
 cp "$SCRIPT_SRC/imei_spoof.sh"         "$DEST_DIR/" 2>/dev/null
 cp "$SCRIPT_SRC/ip_rotator.sh"         "$DEST_DIR/" 2>/dev/null
 cp "$SCRIPT_SRC/auto_reset_loop.sh"    "$DEST_DIR/" 2>/dev/null
+cp "$SCRIPT_SRC/farm_tiktok.sh"        "$DEST_DIR/" 2>/dev/null
+cp "$SCRIPT_SRC/farm_state.sh"         "$DEST_DIR/" 2>/dev/null
+cp "$SCRIPT_SRC/farm_preflight.sh"     "$DEST_DIR/" 2>/dev/null
 cp "$SCRIPT_SRC/README_AUTO_RESET.md"  "$DEST_DIR/" 2>/dev/null
 
 chmod +x "$DEST_DIR"/*.sh 2>/dev/null
@@ -55,6 +58,9 @@ echo ""
 echo " Cara pakai:"
 echo "  • Reset sekali (full):     bash ~/spoof/reset_identity.sh"
 echo "  • Reset sekali (skip IP):  bash ~/spoof/reset_identity.sh skip"
+echo "  • FARM mode TikTok:        bash ~/spoof/farm_tiktok.sh"
+echo "  • Farm state/history:      bash ~/spoof/farm_state.sh"
+echo "  • Farm preflight check:    bash ~/spoof/farm_preflight.sh"
 echo "  • IP-only airplane:        bash ~/spoof/ip_rotator.sh airplane"
 echo "  • Props-only spoof:        bash ~/spoof/spoof_props.sh"
 echo "  • IMEI-only spoof:         bash ~/spoof/imei_spoof.sh"
