@@ -124,14 +124,37 @@ echo "  ✓ reset done"
 
 # ---------- [4] Install APK ----------
 echo "  [4/6] Install APK TikTok..."
+STAGE_APK="/data/local/tmp/tiktok_stage.apk"
+STAGED=0
 if [ -f "$APK_PATH" ]; then
-  if pm install "$APK_PATH" >/dev/null 2>&1; then
-    log "  ✓ APK terinstall: $APK_PATH"
-  elif pm install -r --user 0 "$APK_PATH" >/dev/null 2>&1; then
-    log "  ✓ APK terinstall (--user 0): $APK_PATH"
+  # Android 11+ storage namespace: pm (shell su) hanya bisa akses /data/local/tmp/
+  # Stage APK ke /data/local/tmp/ biar pm install bisa baca file
+  echo "  → staging APK ke $STAGE_APK..."
+  if cp "$APK_PATH" "$STAGE_APK" 2>/dev/null; then
+    STAGED=1
   else
-    log "  ✗ Install gagal — periksa APK / storage permission"
-    echo "  ❌ Install gagal. Cek: su -c 'pm install $APK_PATH'"
+    # Fallback: copy via root (kalau cp gagal karena permission)
+    if su -c "cp '$APK_PATH' '$STAGE_APK' 2>/dev/null"; then
+      su -c "chmod 644 '$STAGE_APK' 2>/dev/null"
+      STAGED=1
+    fi
+  fi
+  if [ "$STAGED" = "1" ]; then
+    if pm install "$STAGE_APK" >/dev/null 2>&1; then
+      log "  ✓ APK terinstall: $APK_PATH"
+    elif pm install -r --user 0 "$STAGE_APK" >/dev/null 2>&1; then
+      log "  ✓ APK terinstall (--user 0): $APK_PATH"
+    else
+      log "  ✗ Install gagal — periksa APK / signature"
+      echo "  ❌ Install gagal. Coba manual: su -c 'pm install $STAGE_APK'"
+    fi
+    # Cleanup staged APK
+    rm -f "$STAGE_APK" 2>/dev/null
+  else
+    log "  ✗ Gagal copy APK ke $STAGE_APK"
+    echo "  ❌ Copy APK gagal. Coba manual:"
+    echo "     su -c 'cp \"\$APK_PATH\" $STAGE_APK'"
+    echo "     su -c 'pm install $STAGE_APK'"
   fi
 else
   log "  ✗ APK gak ditemukan: $APK_PATH"
