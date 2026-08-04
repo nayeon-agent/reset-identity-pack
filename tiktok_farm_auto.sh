@@ -109,6 +109,16 @@ rm -rf /storage/emulated/0/Android/obb/com.ss.android.ugc.aweme /storage/emulate
 log "  ✓ sisa data dihapus"
 echo "  ✓ uninstall done"
 
+# ---------- [2.5] Reset install history (GMS + Play Store) ----------
+echo "  [2.5/6] Reset install history..."
+for SVC in com.google.android.gms com.android.vending; do
+  if pm list packages 2>/dev/null | grep -q "$SVC"; then
+    pm clear "$SVC" >/dev/null 2>&1 && log "  ✓ $SVC cleared" || log "  ✗ $SVC clear gagal"
+  fi
+done
+log "  ✓ GMS + Play Store install history reset"
+echo "  ✓ install history cleared"
+
 # ---------- [3] Reset identitas ----------
 echo "  [3/6] Reset identitas..."
 if [ -f "$SCRIPT_DIR/farm_tiktok.sh" ]; then
