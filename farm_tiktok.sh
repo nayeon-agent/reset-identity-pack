@@ -129,7 +129,7 @@ FINGERPRINT="$(echo "$DEVICE_LINE" | cut -d'|' -f7)"
 SEC_PATCH="$(echo "$DEVICE_LINE" | cut -d'|' -f8)"
 SERIAL_PREFIX="$(echo "$DEVICE_LINE" | cut -d'|' -f9)"
 SERIAL="$(gen_serial "$SERIAL_PREFIX")"
-VBMETA_DIGEST="46ec95edb72801b74f475adca2ff6b2fee76a0def983479fc43e7166710232fd"
+VBMETA_DIGEST="${VBMETA_DIGEST:-46ec95edb72801b74f475adca2ff6b2fee76a0def983479fc43e7166710232fd}"
 
 log "  target: $MODEL ($DEVICE) — hardware=$HARDWARE"
 

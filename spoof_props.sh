@@ -20,7 +20,7 @@ fi
 
 # ============================================================
 #  KONFIGURASI TARGET DEVICE — edit di sini
-#  Default: Samsung Galaxy S25 Ultra (SM-S938B)
+#  Default: Samsung Galaxy S22 (SM-S901B)
 #  Mau device lain? Ganti semua value di bawah
 # ============================================================
 TGT_MANUFACTURER="samsung"
@@ -33,7 +33,11 @@ TGT_FINGERPRINT="samsung/r0sxxx/r0s:16/BP2A.250605.031.A3/S901BXXSNGZD7:user/rel
 TGT_SECURITY_PATCH="2026-05-05"
 TGT_SERIAL="R3CTW$(head -c 4 /dev/urandom | od -An -tx1 | tr -d ' \n')"
 # Attested boot hash dari TEE (wajib match biar DuckDetector pass)
-TGT_VBMETA_DIGEST="46ec95edb72801b74f475adca2ff6b2fee76a0def983479fc43e7166710232fd"
+# Default: hash UniGaga A16 Note 8 S22 spoof (46ec95e...)
+# CARI hash lo: buka DuckDetector > Bootloader card > "Attested boot hash"
+#             atau jalanin: su -c getprop ro.boot.vbmeta.digest (pas device original)
+#             kalo blank (e.g. udah pernah di-spoof), boot ke stock recovery dulu
+TGT_VBMETA_DIGEST="${TGT_VBMETA_DIGEST:-46ec95edb72801b74f475adca2ff6b2fee76a0def983479fc43e7166710232fd}"
 
 # ============================================================
 #  EKSEKUSI
