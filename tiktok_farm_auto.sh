@@ -94,7 +94,14 @@ PRE_IP="$(T ip route get 1.1.1.1 | grep -oE 'src [0-9.]+' | awk '{print $2}')"
 log "  pre: model=$PRE_MODEL gaid=${PRE_GAID:0:8} ip=$PRE_IP"
 echo "  ✓ pre-state: model=$PRE_MODEL ip=$PRE_IP"
 
-# ---------- [2] Uninstall total TikTok ----------
+# ---------- [3] Device name sync (leak: Settings Global) ----------
+echo "  [3/6] Sync device name ke Settings..."
+DEVICE_NAME="$(getprop ro.product.model 2>/dev/null)"
+if [ -n "$DEVICE_NAME" ]; then
+  settings put global device_name "$DEVICE_NAME" 2>/dev/null
+  settings put system device_name "$DEVICE_NAME" 2>/dev/null
+  echo "  ✓ device_name -> $DEVICE_NAME"
+fi
 echo "  [2/6] Uninstall total TikTok..."
 for PKG in "${TIKTOK_PKGS[@]}"; do
   if pm list packages 2>/dev/null | grep -q "$PKG"; then

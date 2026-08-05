@@ -27,9 +27,20 @@ TIKTOK_PKG="com.ss.android.ugc.trill"
 
 mkdir -p "$OUT_ROOT"
 
-ts_id="$(date '+%Y%m%d_%H%M%S')"
-SESSION_DIR="$OUT_ROOT/$ts_id"
-mkdir -p "$SESSION_DIR"
+# Reuse running session if exists
+SESSION_DIR=""
+for d in "$OUT_ROOT"/*/; do
+  if [ -f "$d/.running" ]; then
+    SESSION_DIR="${d%/}"
+    break
+  fi
+done
+
+if [ -z "$SESSION_DIR" ]; then
+  ts_id="$(date '+%Y%m%d_%H%M%S')"
+  SESSION_DIR="$OUT_ROOT/$ts_id"
+  mkdir -p "$SESSION_DIR"
+fi
 
 # State files
 ACTIVITY_LOG="$SESSION_DIR/activity.log"
