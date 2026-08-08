@@ -24,6 +24,9 @@ TGT_SECPATCH="2026-08-05"
 
 # Bootloader — kernel cmdline baca ini; set sebelum zygote
 resetprop -n ro.boot.bootloader "$TGT_BOOTLOADER"
+# Build.BOOTLOADER baca "ro.bootloader" (bukan ro.boot.bootloader!)
+# AOSP Build.java: BOOTLOADER = getString("ro.bootloader")
+resetprop -n ro.bootloader "$TGT_BOOTLOADER"
 
 # Fingerprint semua partition
 resetprop -n ro.build.fingerprint "$TGT_FP"
