@@ -66,6 +66,15 @@ resetprop -n ro.build.id "$FP_ID" 2>>"$LOG_FILE"
 resetprop -n ro.build.flavor "${PRODUCT}-user" 2>>"$LOG_FILE"
 resetprop -n ro.build.description "${PRODUCT}-user $FP_ID user release-keys" 2>>"$LOG_FILE"
 resetprop -n ro.hardware "$HARDWARE" 2>>"$LOG_FILE"
+# Bootloader leak (DuckDetector 2026-08-08): N950FXXUGDVG5 -> S901BXXSNGZD7
+resetprop -n ro.boot.bootloader "$FP_ID" 2>>"$LOG_FILE"
+# Build host/user — pin ke build S22 asli (bukan Note 8)
+resetprop -n ro.build.host "21DN2919" 2>>"$LOG_FILE"
+resetprop -n ro.build.user "dpi" 2>>"$LOG_FILE"
+# Security patch per-partition biar konsisten
+resetprop -n ro.system.build.version.security_patch "2026-08-05" 2>>"$LOG_FILE"
+resetprop -n ro.vendor.build.version.security_patch "2026-08-05" 2>>"$LOG_FILE"
+resetprop -n ro.product.build.version.security_patch "2026-08-05" 2>>"$LOG_FILE"
 log "  ✓ derived props set"
 
 # ---------- Verify ----------
@@ -95,13 +104,43 @@ for part in ro.system.build.fingerprint ro.vendor.build.fingerprint ro.bootimage
   fi
 done
 
+# --- DuckDetector 2026-08-08 leak check ---
+echo ""
+echo "=== DD-RESIDUE CHECK (3 leak sebelumnya) ==="
+echo "  vendor fp      : $(getprop ro.vendor.build.fingerprint)"
+echo "  flavor         : $(getprop ro.build.flavor)"
+echo "  bootloader     : $(getprop ro.boot.bootloader)"
+echo "  model          : $(getprop ro.product.model)"
+echo "  device_name    : $(getprop persist.sys.device_name)"
+VFP="$(getprop ro.vendor.build.fingerprint)"
+if echo "$VFP" | grep -q "r0sxxx"; then
+  echo "  ✅ vendor fingerprint = S22 (no leak)"
+else
+  echo "  ❌ vendor fingerprint masih leak: $VFP"
+  FAIL=$((FAIL+1))
+fi
+FLAV="$(getprop ro.build.flavor)"
+if [ "$FLAV" = "${PRODUCT}-user" ]; then
+  echo "  ✅ flavor konsisten ($FLAV)"
+else
+  echo "  ❌ flavor leak: $FLAV"
+  FAIL=$((FAIL+1))
+fi
+BLDR="$(getprop ro.boot.bootloader)"
+if [ "$BLDR" = "$FP_ID" ]; then
+  echo "  ✅ bootloader = S22 ($BLDR)"
+else
+  echo "  ❌ bootloader masih leak: $BLDR"
+  FAIL=$((FAIL+1))
+fi
+
 if [ "$FAIL" -eq 0 ]; then
   echo ""
-  echo "  ✅ SEMUA partition match — siap lanjut"
+  echo "  ✅ SEMUA partition match + DD-residue bersih — siap lanjut"
 else
   echo ""
-  echo "  ⚠️  Ada $FAIL partition belum match — reboot dulu, jalanin ulang"
+  echo "  ⚠️  Ada $FAIL issue — reboot dulu, jalanin ulang fix_partitions.sh"
 fi
 echo ""
 echo "  Log: $LOG_FILE"
-log "=== Selesai ==="
+log "=== Selesai (fail=$FAIL) ==="
