@@ -113,7 +113,9 @@ apply_sus_hide() {
 # ---------- clean residue ----------
 clean_residue() {
   local cleaned=0
-  for pkg in com.rifsxd.ksunext io.github.a13e300.ksuwebui; do
+  # Termux included: its Android/data dir is FUSE-stat-visible and recreated on demand.
+  # -d /data/data/com.termux untouched — home + tools safe.
+  for pkg in com.rifsxd.ksunext io.github.a13e300.ksuwebui com.termux; do
     for d in /storage/emulated/0/Android/data/$pkg /storage/emulated/0/Android/obb/$pkg; do
       if [ -d "$d" ]; then
         rm -rf "$d" 2>/dev/null
@@ -123,6 +125,33 @@ clean_residue() {
     done
   done
   [ "$cleaned" = "0" ] && echo "  [-] no FUSE residue to clean" | tee -a $LOG
+}
+
+# ---------- find actual hiding mechanism ----------
+find_hide_source() {
+  echo "--- hiding mechanism ---" | tee -a $LOG
+  # LSPosed (any variant)
+  local lsposed=$(ls -d /data/adb/lspd /data/adb/modules/zygisk_lsposed 2>/dev/null | head -1)
+  if [ -n "$lsposed" ]; then
+    echo "  LSPosed: FOUND ($lsposed)" | tee -a $LOG
+    ls -d $lsposed/config/modules/* 2>/dev/null | sed 's/^/    module: /' | tee -a $LOG
+  else
+    echo "  LSPosed: NOT FOUND" | tee -a $LOG
+  fi
+  # KSU Next app management hide (per-app hide via /data/adb/ksu/ or app prefs)
+  local ksuhide=""
+  for f in /data/adb/ksu/hide /data/adb/ksu/app_manage /data/adb/ksu/modules/ksu_hide; do
+    [ -e "$f" ] && ksuhide="$ksuhide $f"
+  done
+  if [ -n "$ksuhide" ]; then
+    echo "  KSU hide config:$ksuhide" | tee -a $LOG
+  else
+    echo "  KSU hide config: none found" | tee -a $LOG
+  fi
+  # Shamiko
+  [ -d /data/adb/modules/shamiko ] && echo "  Shamiko: INSTALLED" | tee -a $LOG || echo "  Shamiko: not installed" | tee -a $LOG
+  # Any Xposed-ish module installed?
+  pm list packages 2>/dev/null | grep -iE "hidemy|lsposed|shamiko|denylist" | sed 's/^/  pkg: /' | tee -a $LOG || true
 }
 
 # ---------- transparent mode (un-hide from HMA) ----------
@@ -169,10 +198,10 @@ for a in "$@"; do
 done
 
 case "$MODE" in
-  check) audit ;;
+  check) audit; find_hide_source ;;
   revert) revert ;;
   transparent) transparent ;;
-  *) audit; apply_sus_hide; clean_residue ;;
+  *) audit; find_hide_source; apply_sus_hide; clean_residue ;;
 esac
 
 echo ""
